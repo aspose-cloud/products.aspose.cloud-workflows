@@ -33,10 +33,10 @@ jobs:
         include: "_index.md" # Will match all .md files in any nested directory 
     
     - name: Build Total
-      run: hugo --config "/config/config-prod.toml" -c "content/total" -b "https://products.aspose.cloud/total" --cleanDestinationDir --minify
+      run: hugo --config "./config/config-prod.toml" -c "content/total" -b "https://products.aspose.cloud/total" --cleanDestinationDir --minify
     
     - name: Deploy Total to S3
-      run: hugo deploy --config "/config/config-prod.toml" --target "total" --maxDeletes -1  --force
+      run: hugo deploy --config "./config/config-prod.toml" --target "total" --maxDeletes -1  --force
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
