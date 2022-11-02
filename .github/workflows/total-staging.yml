@@ -43,7 +43,7 @@ jobs:
       run: hugo --config "./config/config-stage.toml" -c "content/total" -b "https://products-qa.aspose.cloud/total" --cleanDestinationDir --minify
     
     - name: Deploy Total to S3
-      run: hugo deploy --config "./config-stage.toml" --target "total" --maxDeletes -1  --force
+      run: hugo deploy --config "/config/config-stage.toml" --target "total" --maxDeletes -1  --force
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
