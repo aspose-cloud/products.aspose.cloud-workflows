@@ -1,4 +1,4 @@
-name: Total-Production-Split
+name: Total-Split
 on:
   workflow_dispatch:
   repository_dispatch:
