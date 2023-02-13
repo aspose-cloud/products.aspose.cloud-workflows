@@ -62,7 +62,7 @@ jobs:
       - name: Prepare public folder
         run: |
             find /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;=
-            mv /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/total.sitemap public/sitemap.xml;
+            mv /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/total.qa.sitemap public/sitemap.xml;
       - name: Deploy Total to S3
         run: hugo deploy --config "config/config-total.toml" --maxDeletes=0 --target "staging"
         env:
