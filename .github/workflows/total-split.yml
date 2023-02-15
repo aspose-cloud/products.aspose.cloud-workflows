@@ -15,19 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         configure_one_product:
-          - android
-          - cpp
-          - curl
           - go
-          - java
-          - net
-          - nodejs
-          - perl
-          - php
-          - python
-          - ruby
-          - swift
-
     steps:
       - name: Checkout theme repo
         uses: actions/checkout@main
