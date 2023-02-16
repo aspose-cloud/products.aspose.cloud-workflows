@@ -1,11 +1,16 @@
 name: Total-Split
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [production-complete]
+    inputs:
+      environment:
+        description: 'Build environment'
+        type: environment
+        default: staging
+        required: true
 jobs:
   deploy:
     runs-on: macos-latest
+    environment: ${{ github.event.inputs.environment }}
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
@@ -27,7 +32,6 @@ jobs:
           - python
           - ruby
           - swift
-
     steps:
       - name: Checkout theme repo
         uses: actions/checkout@main
@@ -44,27 +48,23 @@ jobs:
         with:
           hugo-version: 0.101.0
           extended: true
-      - name: Install Node.js Dependencies
+      - name: Install Node.js dependencies
         run: npm install
-      - name: Install autoprefixer
-        run: npm install -D --save autoprefixer
-      - name: Install postcss-cli
-        run: npm install -D --save postcss-cli
       - name: Configure build environment
         env:
           CONFIGURE_ONE_PRODUCT: ${{ matrix.configure_one_product }}
         run: npm run configure
       - name: Display config.json
         run: cat /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
-      - name: Build Total
-        run: hugo --config "config/config-total.toml","config.json" -c "content/total" -b "https://products-qa.aspose.cloud/total" --cleanDestinationDir --minify
-          --templateMetrics --templateMetricsHints --printMemoryUsage
+      - name: Build ${{ matrix.configure_one_product }}
+        run: hugo --config "config/config-total.toml","config.json" -c "content/total" -b "${{ vars.BASEURL }}total" --cleanDestinationDir --minify
+          --templateMetrics --templateMetricsHints
       - name: Prepare public folder
         run: |
             find /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;=
-            mv /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/total.qa.sitemap public/sitemap.xml;
-      - name: Deploy Total to S3
-        run: hugo deploy --config "config/config-total.toml" --maxDeletes=0 --target "staging"
+            mv /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/${{ vars.INDEX_SITEMAP }} public/sitemap.xml;
+      - name: Deploy ${{ matrix.configure_one_product }} to S3
+        run: hugo deploy --config "config/config-total.toml" --maxDeletes=0 --target "${{ github.event.inputs.environment }}"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
