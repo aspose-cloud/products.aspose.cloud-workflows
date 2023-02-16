@@ -39,10 +39,6 @@ jobs:
           extended: true
       - name: Install Node.js Dependencies
         run: npm install
-      - name: Install autoprefixer
-        run: npm install -D --save autoprefixer
-      - name: Install postcss-cli
-        run: npm install -D --save postcss-cli
       - name: Configure build environment
         env:
           CONFIGURE_ONE_PRODUCT: ${{ matrix.configure_one_product }}
@@ -55,8 +51,8 @@ jobs:
       - name: Prepare public folder
         run: |
             find /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;=
-            mv /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/total.qa.sitemap public/sitemap.xml;
-      - name: Deploy Total to S3
+            mv /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/${{ vars.INDEX_SITEMAP }} public/sitemap.xml;
+      - name: Deploy ${{ matrix.configure_one_product }} to S3
         run: hugo deploy --config "config/config-total.toml" --maxDeletes=0 --target "${{ github.event.inputs.environment }}"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
