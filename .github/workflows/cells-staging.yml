@@ -40,10 +40,10 @@ jobs:
         include: "_index.md" # Will match all .md files in any nested directory      
     
     - name: Build Cells
-      run: hugo --config "./cells-stage.toml" -c "content/cells" -b "https://products-qa.aspose.cloud/cells" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints   
+      run: hugo --config "./config/cells-stage.toml" -c "content/cells" -b "https://products-qa.aspose.cloud/cells" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints   
     
     - name: Deploy Cells to S3
-      run: hugo deploy --config "./cells-stage.toml" --target "cells" --maxDeletes -1  --force
+      run: hugo deploy --config "./config/cells-stage.toml" --target "cells" --maxDeletes -1  --force
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
