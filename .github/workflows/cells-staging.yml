@@ -29,7 +29,7 @@ jobs:
       run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/url:/url_ignore:/g {} +
 
     - name: Find and Replace domain name
-      run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/products.apsose.cloud:/products-qa.aspose.cloud:/g {} +
+      run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/products.aspose.cloud:/products-qa.aspose.cloud:/g {} +
     
     - name: Build Cells
       run: hugo --config "./config/cells-stage.toml" -c "content/cells" -b "https://products-qa.aspose.cloud/cells" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints   
