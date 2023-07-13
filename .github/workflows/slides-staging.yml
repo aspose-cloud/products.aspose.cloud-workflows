@@ -26,18 +26,10 @@ jobs:
       run:  npm install -D --save postcss-cli
 
     - name: Find and Replace
-      uses: jacobtomlinson/gha-find-replace@v2
-      with:
-        find: "url:"
-        replace: "url_ignore:"
-        include: "_index.md" # Will match all .md files in any nested directory
+      run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/url:/url_ignore:/g {} +
 
     - name: Find and Replace domain name
-      uses: jacobtomlinson/gha-find-replace@v2
-      with:
-        find: "products.aspose.cloud"
-        replace: "products-qa.aspose.cloud"
-        include: "_index.md" # Will match all .md files in any nested directory      
+      run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/products.aspose.cloud:/products-qa.aspose.cloud:/g {} +
     
     - name: Build Slides
       run: hugo --config "./config/slides-stage.toml" -b "https://products-qa.aspose.cloud/slides" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints   

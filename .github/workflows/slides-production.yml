@@ -26,11 +26,7 @@ jobs:
       run:  npm install -D --save postcss-cli
 
     - name: Find and Replace
-      uses: jacobtomlinson/gha-find-replace@v2
-      with:
-        find: "url:"
-        replace: "url_ignore:"
-        include: "_index.md" # Will match all .md files in any nested directory 
+      run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/url:/url_ignore:/g {} +
     
     - name: Build Slides
       run: hugo --config "./config/slides-prod.toml" -c "content/slides" -b "https://products.aspose.cloud/slides" --cleanDestinationDir --minify
