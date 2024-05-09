@@ -55,7 +55,7 @@ jobs:
       - name: Display config.json
         run: cat /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
       - name: Build ${{ matrix.configure_one_product }}
-        run: hugo --config "./config/cells-stage.toml" -c "content/cells" -b "https://products-qa.aspose.cloud/cells" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints
+        run: hugo --config "./config/cells-stage.toml","config.json" -c "content/cells" -b "https://products-qa.aspose.cloud/cells" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints
       - name: Prepare public folder
         run: |
             find /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;=
