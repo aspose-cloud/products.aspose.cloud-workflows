@@ -1,4 +1,4 @@
-name: Cells-Split
+name: Cells-Staging-Split
 on:
   workflow_dispatch:
 jobs:
@@ -44,10 +44,16 @@ jobs:
         run: npm install -D --save autoprefixer
       - name: Install postcss-cli
         run: npm install -D --save postcss-cli
-      - name: Find and Replace
-        run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/url:/url_ignore:/g {} +
-      - name: Find and Replace domain name
-        run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/products.aspose.cloud:/products-qa.aspose.cloud:/g {} +
+      # - name: Find and Replace
+      #   run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/url:/url_ignore:/g {} +
+      # - name: Find and Replace domain name
+      #   run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/products.aspose.cloud:/products-qa.aspose.cloud:/g {} +
+      - name: Configure build environment
+        env:
+          CONFIGURE_ONE_PRODUCT: ${{ matrix.configure_one_product }}
+        run: npm run configure
+      - name: Display config.json
+        run: cat /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
       - name: Build ${{ matrix.configure_one_product }}
         run: hugo --config "./config/cells-stage.toml" -c "content/cells" -b "https://products-qa.aspose.cloud/cells" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints
       - name: Prepare public folder
