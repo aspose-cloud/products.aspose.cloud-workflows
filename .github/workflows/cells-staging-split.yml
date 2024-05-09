@@ -58,7 +58,7 @@ jobs:
     - name: Build Cells ${{ matrix.components }}
       run: hugo --config "./config/cells-stage.toml" -c "content/cells" -b "https://products-qa.aspose.cloud/cells" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints
 
-        - name: Prepare public folder
+      - name: Prepare public folder
         run: |
             find /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.components }}.xml \;=
             mv /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/${{ vars.INDEX_SITEMAP }} public/sitemap.xml;
