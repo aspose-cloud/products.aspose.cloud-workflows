@@ -2,60 +2,60 @@ name: Cells-Split
 on:
   workflow_dispatch:
 jobs:
-  build:
+  deploy:
     runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
-        components:
+        configure_one_product:
           - android
           - background
           - clear
           - conversion
-          - cpp
-          - curl
           - export
           - family
+          - merge
+          - saveas
+          - protect
+          - cpp
+          - curl
           - go
           - java
-          - merge
           - net
           - nodejs
           - perl
           - php
-          - protect
           - python
           - ruby
-          - saveas
           - swift
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
+      - name: Checkout theme repo
+        uses: actions/checkout@v2
+        with:
           repository: aspose-cloud/products.aspose.cloud
           token: ${{ secrets.REPO_TOKEN }}
           fetch-depth: 0
-    - name: Setup Hugo
-      uses: peaceiris/actions-hugo@v2
-      with:
-          hugo-version: '0.101.0'
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: 0.101.0
           extended: true
-    - name: Install autoprefixer
-      run:  npm install -D --save autoprefixer
-    - name: Install postcss-cli
-      run:  npm install -D --save postcss-cli
-    - name: Find and Replace
-      run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/url:/url_ignore:/g {} +
-    - name: Find and Replace domain name
-      run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/products.aspose.cloud:/products-qa.aspose.cloud:/g {} +
-    - name: Build Cells ${{ matrix.components }}
-      run: hugo --config "./config/cells-stage.toml" -c "content/cells" -b "https://products-qa.aspose.cloud/cells" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints
-    - name: Prepare public folder
-      run: |
-        find /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.components }}.xml \;
-        mv /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/${{ vars.INDEX_SITEMAP }} public/sitemap.xml;
-    - name: Deploy Cells ${{ matrix.components }} to S3
-      run: hugo deploy --config "./config/cells-stage.toml" --target "cells" --maxDeletes=0  --force
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
+      - name: Install autoprefixer
+        run: npm install -D --save autoprefixer
+      - name: Install postcss-cli
+        run: npm install -D --save postcss-cli
+      - name: Find and Replace
+        run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/url:/url_ignore:/g {} +
+      - name: Find and Replace domain name
+        run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/products.aspose.cloud:/products-qa.aspose.cloud:/g {} +
+      - name: Build ${{ matrix.configure_one_product }}
+        run: hugo --config "./config/cells-stage.toml" -c "content/cells" -b "https://products-qa.aspose.cloud/cells" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints
+      - name: Prepare public folder
+        run: |
+            find /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;=
+            mv /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/${{ vars.INDEX_SITEMAP }} public/sitemap.xml;
+      - name: Deploy ${{ matrix.configure_one_product }} to S3
+        run: hugo deploy --config "./config/cells-stage.toml" --target "cells" --maxDeletes=0  --force
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
