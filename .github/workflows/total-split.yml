@@ -42,11 +42,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
       - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v2.4.13
+        uses: peaceiris/actions-hugo@v2
         with:
-          hugo-version: 0.136.5
+          hugo-version: 'latest'
           extended: true
       - name: Install Node.js dependencies
         run: npm install
