@@ -9,7 +9,7 @@ on:
         required: true
 jobs:
   deploy:
-    runs-on:  macos-13
+    runs-on:  ubuntu-latest
     environment: ${{ github.event.inputs.environment }}
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
@@ -61,8 +61,8 @@ jobs:
         env:
           CONFIGURE_ONE_PRODUCT: ${{ matrix.configure_one_product }}
         run: npm run configure
-      - name: Display config.json
-        run: cat /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
+#      - name: Display config.json
+#        run: cat /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
       - name: Build ${{ matrix.configure_one_product }}
         run: hugo --config "config/config-total.toml","config.json" -c "content/total" -b "${{ vars.BASEURL }}total" --cleanDestinationDir --minify
           --templateMetrics --templateMetricsHints
