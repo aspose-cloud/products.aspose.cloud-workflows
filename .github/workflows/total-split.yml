@@ -61,15 +61,22 @@ jobs:
         env:
           CONFIGURE_ONE_PRODUCT: ${{ matrix.configure_one_product }}
         run: npm run configure
-#      - name: Display config.json
+      - name: Display config.json
+        run: cat /home/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
+#        Following are for macos
 #        run: cat /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
+
       - name: Build ${{ matrix.configure_one_product }}
         run: hugo --config "config/config-total.toml","config.json" -c "content/total" -b "${{ vars.BASEURL }}total" --cleanDestinationDir --minify
           --templateMetrics --templateMetricsHints
       - name: Prepare public folder
         run: |
-            find /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;=
-            mv /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/${{ vars.INDEX_SITEMAP }} public/sitemap.xml;
+          find /home/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;
+          mv /home/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/${{ vars.INDEX_SITEMAP }} public/sitemap.xml
+#          Following are for macos
+#            find /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;=
+#            mv /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/${{ vars.INDEX_SITEMAP }} public/sitemap.xml;
+
       - name: Deploy ${{ matrix.configure_one_product }} to S3
         run: hugo deploy --config "config/config-total.toml" --maxDeletes=0 --target "${{ github.event.inputs.environment }}"
         env:
