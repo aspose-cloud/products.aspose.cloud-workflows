@@ -41,10 +41,10 @@ jobs:
         replace: "products-qa.aspose.cloud"
         include: "_index.md" # Will match all .md files in any nested directory      
     
-    - name: Build omr
+    - name: Build home
       run: hugo --config "./config-home.toml" -b "https://products-qa.aspose.cloud/" --cleanDestinationDir --minify
     
-    - name: Deploy omr to S3
+    - name: Deploy home to S3
       run: hugo deploy --config "./config-home.toml" --target "staging" --maxDeletes -1  --force
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
