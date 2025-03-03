@@ -38,7 +38,7 @@ jobs:
       run: hugo --config "./config-home.toml" -b "https://products.aspose.cloud/" --cleanDestinationDir --minify
     
     - name: Deploy HOME to S3
-      run: hugo deploy --config "./config-home.toml" --target "staging" --force
+      run: hugo deploy --config "./config-home.toml" --target "production" --force
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
