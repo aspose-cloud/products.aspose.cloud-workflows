@@ -45,7 +45,7 @@ jobs:
       run: hugo --config "./config-home.toml" -b "https://products-qa.aspose.cloud/" --cleanDestinationDir --minify
     
     - name: Deploy home to S3
-      run: hugo deploy --config "./config-home.toml" --target "staging" --maxDeletes -1  --force
+      run: hugo deploy --config "./config-home.toml" --target "staging" --force
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
