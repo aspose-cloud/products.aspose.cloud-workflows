@@ -34,13 +34,6 @@ jobs:
         replace: "url_ignore:"
         include: "_index.md" # Will match all .md files in any nested directory
 
-    - name: Find and Replace domain name
-      uses: jacobtomlinson/gha-find-replace@v2
-      with:
-        find: "url:"
-        replace: "url_ignore:"
-        include: "_index.md" # Will match all .md files in any nested directory      
-    
     - name: Build HOME
       run: hugo --config "./config-home.toml" -b "https://products.aspose.cloud/" --cleanDestinationDir --minify
     
