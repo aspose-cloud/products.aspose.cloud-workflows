@@ -18,7 +18,7 @@ jobs:
     - name: Setup Hugo
       uses: peaceiris/actions-hugo@v2
       with:
-          hugo-version: 'latest'
+          hugo-version: 0.136.5
           extended: true
     - name: Install Dependicies1
       run:  npm install -D --save autoprefixer
@@ -37,7 +37,7 @@ jobs:
       run: hugo --config "./config-prod.toml" -c "content/omr" -b "https://products.aspose.cloud/omr" --cleanDestinationDir --minify
     
     - name: Deploy omr to S3
-      run: hugo deploy --config "./config-prod.toml" --target "omr" --maxDeletes -1  --force
+      run: hugo deploy --config "./config-prod.toml" --target "omr"  --force
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
