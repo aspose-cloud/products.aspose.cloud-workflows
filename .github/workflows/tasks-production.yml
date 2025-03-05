@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: OMR-Production
+name: tasks-Production
 
 # Controls when the action will run. 
 on:    
@@ -18,7 +18,7 @@ jobs:
     - name: Setup Hugo
       uses: peaceiris/actions-hugo@v2
       with:
-          hugo-version: 0.136.5
+          hugo-version: 0.110.0
           extended: true
     - name: Install Dependicies1
       run:  npm install -D --save autoprefixer
@@ -33,11 +33,11 @@ jobs:
         replace: "url_ignore:"
         include: "_index.md" # Will match all .md files in any nested directory
 
-    - name: Build omr
-      run: hugo --config "./config-prod.toml" -c "content/omr" -b "https://products.aspose.cloud/omr" --cleanDestinationDir --minify
+    - name: Build tasks
+      run: hugo --config "./config-prod.toml" -c "content/tasks" -b "https://products.aspose.cloud/tasks" --cleanDestinationDir --minify
     
-    - name: Deploy omr to S3
-      run: hugo deploy --config "./config-prod.toml" --target "omr"  --force
+    - name: Deploy tasks to S3
+      run: hugo deploy --config "./config-prod.toml" --target "tasks"  --force
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
