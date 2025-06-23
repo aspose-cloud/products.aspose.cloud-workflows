@@ -58,8 +58,7 @@ jobs:
         run: hugo --config "./config/cells-stage.toml","config.json" -c "content/cells" -b "https://products-qa.aspose.cloud/cells" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints
       - name: Prepare public folder
         run: |
-         find $GITHUB_WORKSPACE/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;
-         mv $GITHUB_WORKSPACE/${{ vars.INDEX_SITEMAP }} $GITHUB_WORKSPACE/public/sitemap.xml
+         find $GITHUB_WORKSPACE/public -iname 'sitemap.xml' 
       - name: Deploy ${{ matrix.configure_one_product }} to S3
         run: hugo deploy --config "./config/cells-stage.toml" --target "cells" --maxDeletes=0  --force
         env:
