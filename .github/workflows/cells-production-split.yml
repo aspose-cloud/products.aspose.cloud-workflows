@@ -54,6 +54,18 @@ jobs:
         run: cat /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
       - name: Build ${{ matrix.configure_one_product }}
         run: hugo --config "./config/cells-prod.toml","config.json" -c "content/cells" -b "https://products.aspose.cloud/cells" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints
+      - name: Debug directory structure
+        run: |
+          echo "=== nowfloder ==="
+          pwd
+          echo "=== floder ==="
+          ls -la
+          echo "=== allfloder ==="
+          find . -maxdepth 2 -type d | sort
+          echo "=== all public  ==="
+          find . -name "*public*" -type d 2>/dev/null || echo "no public "
+          echo "=== all sitemap  ==="
+          find . -name "sitemap.xml" -type f 2>/dev/null || echo "no sitemap.xml"
       - name: Prepare public folder
         run: |
              find /home/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;
