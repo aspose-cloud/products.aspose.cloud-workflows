@@ -68,7 +68,8 @@ jobs:
           find . -name "sitemap.xml" -type f 2>/dev/null || echo "no sitemap.xml"
       - name: Prepare public folder
         run: |
-             find /home/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;
+             find ./public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;
+         #    find /home/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;
         #  mv /home/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/${{ vars.INDEX_SITEMAP }} public/sitemap.xml
 
       - name: Deploy ${{ matrix.configure_one_product }} to S3
