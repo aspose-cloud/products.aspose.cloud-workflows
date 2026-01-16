@@ -96,7 +96,7 @@ jobs:
 #     For Testing only
       - name: Sync to Ceph S3 Bucket -- Test Run
         run: |
-          aws s3 ls --endpoint-url "$AWS_ENDPOINT_URL"
+          aws s3api list-buckets --endpoint-url "$AWS_ENDPOINT_URL"
 
           
 #      - name: Purge BunnyCDN (optional)
@@ -108,6 +108,3 @@ jobs:
 #            "https://api.dynabic.com/bn/purge?async=true"          
 
 
-      - name: Test Ceph access (hardcoded QA)
-        run: |
-          aws s3api list-buckets --endpoint-url "$AWS_ENDPOINT_URL"
