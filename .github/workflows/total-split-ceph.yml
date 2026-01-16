@@ -85,18 +85,24 @@ jobs:
 #          AWS_ACCESS_KEY_ID: ${{ secrets.CEPH_S3_ACCESS_KEY }}
 #          AWS_SECRET_ACCESS_KEY: ${{ secrets.CEPH_S3_SECRET_KEY }}
 
-      - name: Sync to Ceph S3 Bucket
-        run: |
-          echo "Deploying to Ceph S3 bucket..."
-          aws s3 sync ./public/ s3://products-aspose-cloud/ \
-            --endpoint-url "$AWS_ENDPOINT_URL" \
-            --acl public-read \
-            --delete
+ #     - name: Sync to Ceph S3 Bucket
+ #       run: |
+ #         echo "Deploying to Ceph S3 bucket..."
+ #         aws s3 sync ./public/ s3://products-aspose-cloud/ \
+ #           --endpoint-url "$AWS_ENDPOINT_URL" \
+ #           --acl public-read \
+ #           --delete
 
-      - name: Purge BunnyCDN (optional)
-        if: success()
+#     For Testing only
+      - name: Sync to Ceph S3 Bucket -- Test Run
         run: |
-          curl -siG \
-            -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
-            --data-urlencode "url=${{ vars.BASEURL }}" \
-            "https://api.dynabic.com/bn/purge?async=true"          
+          aws s3 ls --endpoint-url "$AWS_ENDPOINT_URL"
+
+          
+#      - name: Purge BunnyCDN (optional)
+#        if: success()
+#        run: |
+#          curl -siG \
+#            -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
+#            --data-urlencode "url=${{ vars.BASEURL }}" \
+#            "https://api.dynabic.com/bn/purge?async=true"          
