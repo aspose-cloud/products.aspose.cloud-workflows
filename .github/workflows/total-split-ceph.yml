@@ -68,9 +68,10 @@ jobs:
 #        Following are for macos
 #        run: cat /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
 
-#      - name: Build ${{ matrix.configure_one_product }}
-#        run: hugo --config "config/config-total.toml","config.json" -c "content/total" -b "${{ vars.BASEURL }}total" --cleanDestinationDir --minify
-#          --templateMetrics --templateMetricsHints
+      - name: Build ${{ matrix.configure_one_product }}
+        run: hugo --config "config/config-total.toml","config.json" -c "content/total" -b "${{ vars.BASEURL }}total" --cleanDestinationDir --minify
+          --templateMetrics --templateMetricsHints
+          
       - name: Prepare public folder
         run: |
           find /home/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;
