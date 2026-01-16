@@ -16,7 +16,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.CEPH_S3_SECRET_KEY }}
       AWS_DEFAULT_REGION: us-east-1
       AWS_EC2_METADATA_DISABLED: "true"
-      AWS_ENDPOINT_URL: https://s3.dynabic.com      
+      AWS_ENDPOINT_URL: ${{ vars.AWS_ENDPOINT_URL }}
     continue-on-error: true
     strategy:
       fail-fast: false
@@ -68,9 +68,9 @@ jobs:
 #        Following are for macos
 #        run: cat /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
 
-      - name: Build ${{ matrix.configure_one_product }}
-        run: hugo --config "config/config-total.toml","config.json" -c "content/total" -b "${{ vars.BASEURL }}total" --cleanDestinationDir --minify
-          --templateMetrics --templateMetricsHints
+#      - name: Build ${{ matrix.configure_one_product }}
+#        run: hugo --config "config/config-total.toml","config.json" -c "content/total" -b "${{ vars.BASEURL }}total" --cleanDestinationDir --minify
+#          --templateMetrics --templateMetricsHints
       - name: Prepare public folder
         run: |
           find /home/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/public -iname 'sitemap.xml' -execdir mv -i '{}' ${{ matrix.configure_one_product }}.xml \;
@@ -106,3 +106,8 @@ jobs:
 #            -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
 #            --data-urlencode "url=${{ vars.BASEURL }}" \
 #            "https://api.dynabic.com/bn/purge?async=true"          
+
+
+      - name: Test Ceph access (hardcoded QA)
+        run: |
+          aws s3api list-buckets --endpoint-url "$AWS_ENDPOINT_URL"
