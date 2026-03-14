@@ -19,9 +19,10 @@ jobs:
       - name: Generate matrix from folders
         id: set-matrix
         run: |
-          folders=$(ls -d content/slides/*/ | xargs -n 1 basename)
-          json=$(printf '%s\n' $folders | jq -R . | jq -s .)
-          echo "matrix={\"configure_one_product\":$json}" >> $GITHUB_OUTPUT
+      - name: Generate matrix from folders
+        id: set-matrix
+        run: |
+          echo "matrix={\"configure_one_product\":$(ls -d content/slides/*/ | xargs -n 1 basename | jq -R . | jq -sc .)}" >> $GITHUB_OUTPUT
 
   deploy:
     needs: discover
