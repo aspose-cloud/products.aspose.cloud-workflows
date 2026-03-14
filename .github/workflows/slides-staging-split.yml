@@ -1,0 +1,72 @@
+name: Slides-Staging-Split
+
+on:
+  workflow_dispatch:
+
+jobs:
+  discover:
+    runs-on: macos-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: aspose-cloud/products.aspose.cloud
+          token: ${{ secrets.REPO_TOKEN }}
+          fetch-depth: 0
+
+      - name: Generate matrix from folders
+        id: set-matrix
+        run: |
+          folders=$(ls -d content/slides/*/ | xargs -n 1 basename)
+          json=$(printf '%s\n' $folders | jq -R . | jq -s .)
+          echo "matrix={\"configure_one_product\":$json}" >> $GITHUB_OUTPUT
+
+  deploy:
+    needs: discover
+    runs-on: macos-latest
+
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: aspose-cloud/products.aspose.cloud
+          token: ${{ secrets.REPO_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.101.0'
+          extended: true
+
+      - name: Install autoprefixer
+        run: npm install -D --save autoprefixer
+
+      - name: Install postcss-cli
+        run: npm install -D --save postcss-cli
+
+      - name: Find and Replace
+        run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/url:/url_ignore:/g {} +
+
+      - name: Find and Replace domain name
+        run: LC_ALL=C find . -type f -name '*.md' -exec sed -i '' s/products.aspose.cloud:/products-qa.aspose.cloud:/g {} +
+
+      - name: Configure build
+        env:
+          CONFIGURE_ONE_PRODUCT: ${{ matrix.configure_one_product }}
+        run: npm run configure
+
+      - name: Build Slides
+        run: hugo --config "./config/slides-stage.toml","config.json" -c content/slides -b "https://products-qa.aspose.cloud/slides" --cleanDestinationDir --minify
+
+      - name: Deploy
+        run: hugo deploy --config "./config/slides-stage.toml" --target "slides" --maxDeletes=0 --force
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
