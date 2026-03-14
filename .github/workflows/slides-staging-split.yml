@@ -60,6 +60,16 @@ jobs:
           CONFIGURE_ONE_PRODUCT: ${{ matrix.configure_one_product }}
         run: npm run configure
 
+      - name: Debug content count
+        run: |
+          echo "Markdown files:"
+          find content/slides -name "*.md" | wc -l
+          echo "Folders:"
+          find content/slides -maxdepth 2 -type d
+
+      - name: Display config.json
+        run: cat /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
+
       - name: Build Slides
         run: hugo --config "./config/slides-stage.toml","config.json" -c content/slides -b "https://products-qa.aspose.cloud/slides" --cleanDestinationDir --minify
 
