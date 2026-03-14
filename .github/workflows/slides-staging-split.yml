@@ -19,9 +19,6 @@ jobs:
       - name: Generate matrix from folders
         id: set-matrix
         run: |
-      - name: Generate matrix from folders
-        id: set-matrix
-        run: |
           echo "matrix={\"configure_one_product\":$(ls -d content/slides/*/ | xargs -n 1 basename | jq -R . | jq -sc .)}" >> $GITHUB_OUTPUT
 
   deploy:
