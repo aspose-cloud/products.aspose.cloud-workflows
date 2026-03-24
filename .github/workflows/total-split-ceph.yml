@@ -105,7 +105,7 @@ jobs:
         run: |
           curl -siG \
             -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
-            --data-urlencode "url=${{ vars.BASEURL }}" \
-            "https://api.dynabic.com/bn/purge?async=true"          
+            --data-urlencode "url=${{ vars.BASEURL }}total/${{ matrix.configure_one_product }}/" \
+            "https://api.dynabic.com/bn/purge?async=true" || true
 
 
