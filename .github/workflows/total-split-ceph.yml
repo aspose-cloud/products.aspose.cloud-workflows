@@ -89,7 +89,7 @@ jobs:
       - name: Sync to Ceph S3 Bucket - ${{ matrix.configure_one_product }}
         run: |
           echo "Deploying to Ceph S3 bucket..."
-          aws s3 sync ./public/ s3://${{ vars.BUCKET }}/ \
+          aws s3 sync ./public/ s3://${{ vars.BUCKET }}/total/ \
             --endpoint-url "$AWS_ENDPOINT_URL" \
             --acl public-read \
             --delete
