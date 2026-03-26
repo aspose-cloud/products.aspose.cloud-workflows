@@ -85,14 +85,19 @@ jobs:
 #        env:
 #          AWS_ACCESS_KEY_ID: ${{ secrets.CEPH_S3_ACCESS_KEY }}
 #          AWS_SECRET_ACCESS_KEY: ${{ secrets.CEPH_S3_SECRET_KEY }}
-
+      - name: Force S3 path-style addressing for Ceph
+        run: aws configure set default.s3.addressing_style path
+      
       - name: Sync to Ceph S3 Bucket - ${{ matrix.configure_one_product }}
         run: |
+          set -euo pipefail
           echo "Deploying to Ceph S3 bucket..."
+          test -n "${AWS_ENDPOINT_URL:-}" || (echo "AWS_ENDPOINT_URL is empty" && exit 1)
+      
           aws s3 sync ./public/ s3://${{ vars.BUCKET }}/total/ \
             --endpoint-url "$AWS_ENDPOINT_URL" \
             --acl public-read \
-            --delete
+            --exact-timestamps
 
 #     For Testing only
 #      - name: Sync to Ceph S3 Bucket -- Test Run
