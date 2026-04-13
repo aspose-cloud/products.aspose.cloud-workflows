@@ -69,8 +69,7 @@ jobs:
 #        run: cat /Users/runner/work/products.aspose.cloud-workflows/products.aspose.cloud-workflows/config.json
 
       - name: Build ${{ matrix.configure_one_product }}
-        run: hugo --config "config/config-total.toml","config.json" -c "content/total" -b "${{ vars.BASEURL }}total" --cleanDestinationDir --minify
-          --templateMetrics --templateMetricsHints
+        run: hugo --config "config/config-total.toml","config.json" -c "content/total" -b "${{ vars.BASEURL }}total" --cleanDestinationDir --minify --templateMetrics --templateMetricsHints
           
       - name: Prepare public folder
         run: |
