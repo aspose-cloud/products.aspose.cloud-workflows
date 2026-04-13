@@ -105,7 +105,7 @@ jobs:
 #          aws s3api list-buckets --endpoint-url "$AWS_ENDPOINT_URL"
 
           
-      - name: Purge BunnyCDN (optional) -- URL: ${{ vars.BASEURL }}total/${{ matrix.configure_one_product }}/*
+      - name: Purge BunnyCDN (optional) -- URL: ${{ vars.BASEURL }}total/${{ matrix.configure_one_product }}
         if: success()
         run: |
           curl -siG \
