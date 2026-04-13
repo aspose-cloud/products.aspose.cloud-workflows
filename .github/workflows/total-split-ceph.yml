@@ -107,9 +107,9 @@ jobs:
       - name: Purge BunnyCDN (optional) -- URL: ${{ vars.BASEURL }}total/${{ matrix.configure_one_product }}
         if: success()
         run: |
-          curl -siG \
+          curl -sS --fail-with-body -G \
             -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
             --data-urlencode "url=${{ vars.BASEURL }}total/${{ matrix.configure_one_product }}/*" \
-            "https://api.dynabic.com/bn/purge?async=true" || true
+            "https://api.dynabic.com/bn/purge?async=true"
 
 
