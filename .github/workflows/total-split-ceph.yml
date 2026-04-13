@@ -105,12 +105,12 @@ jobs:
 #          aws s3api list-buckets --endpoint-url "$AWS_ENDPOINT_URL"
 
           
-      - name: Purge BunnyCDN (optional)
+      - name: Purge BunnyCDN (optional) -- URL: ${{ vars.BASEURL }}total/${{ matrix.configure_one_product }}/*
         if: success()
         run: |
           curl -siG \
             -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
-            --data-urlencode "url=${{ vars.BASEURL }}total/${{ matrix.configure_one_product }}/" \
+            --data-urlencode "url=${{ vars.BASEURL }}total/${{ matrix.configure_one_product }}/*" \
             "https://api.dynabic.com/bn/purge?async=true" || true
 
 
