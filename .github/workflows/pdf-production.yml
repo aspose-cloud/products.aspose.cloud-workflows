@@ -67,9 +67,15 @@ jobs:
             --page-size 1000
 
       - name: Purge BunnyCDN
+        id: cdn_purge
         if: success()
+        continue-on-error: true
         run: |
-          curl -sS --fail-with-body -G \
+          curl -iG \
             -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
             --data-urlencode "url=https://products.aspose.cloud/pdf/*" \
             "https://api.dynabic.com/bn/purge?async=true"
+
+      - name: Warn on CDN purge failure
+        if: steps.cdn_purge.outcome == 'failure'
+        run: echo "::warning title=CDN purge failed::products.aspose.cloud/pdf CDN cache purge failed — stale content may be served until TTL expires."
