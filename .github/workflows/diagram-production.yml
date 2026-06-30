@@ -36,8 +36,24 @@ jobs:
     - name: Build diagram
       run: hugo --config "./config-prod.toml" -c "content/diagram" -b "https://products.aspose.cloud/diagram" --cleanDestinationDir --minify
     
-    - name: Deploy diagram to S3
-      run: hugo deploy --config "./config-prod.toml" --target "diagram"  --force
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
+    - name: Force S3 path-style addressing for Ceph
+        run: aws configure set default.s3.addressing_style path
+
+    - name: Sync to Ceph S3 Bucket - ${{ matrix.configure_one_product }}
+      run: |
+        set -euo pipefail
+        echo "Deploying to Ceph S3 bucket..."
+        test -n "${AWS_ENDPOINT_URL:-}" || (echo "AWS_ENDPOINT_URL is empty" && exit 1)
+
+        aws s3 sync ./public/ s3://products-aspose-cloud/diagram/ \
+          --endpoint-url "$AWS_ENDPOINT_URL" \
+          --acl public-read \
+          --exact-timestamps
+
+    - name: Purge BunnyCDN (production only)
+      if: success() && env.DEPLOY_ENV == 'production'
+      run: |
+        curl -sS --fail-with-body -G \
+          -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
+          --data-urlencode "url=https://products.aspose.cloud/diagram/*" \
+          "https://api.dynabic.com/bn/purge?async=true"
