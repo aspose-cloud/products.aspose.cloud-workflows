@@ -13,7 +13,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.CEPH_S3_SECRET_KEY }}
       AWS_DEFAULT_REGION: us-east-1
       AWS_EC2_METADATA_DISABLED: "true"
-      AWS_ENDPOINT_URL: https://s3.dynabic.com
+      AWS_ENDPOINT_URL: ${{ vars.AWS_ENDPOINT_URL }}
 
     steps:
       - name: Checkout
@@ -50,10 +50,26 @@ jobs:
           include: "_index.md" # Will match all .md files in any nested directory
 
       - name: Build barcode
-        run: hugo --config "./config-stage.toml" -c "content/barcode" -b "https://products-qa.aspose.cloud/barcode" --cleanDestinationDir --minify
+        run: hugo --config "./config-stage.toml" -c "content/barcode" -b "${{ vars.BASEURL }}barcode/" --cleanDestinationDir --minify
 
       - name: Force S3 path-style addressing for Ceph
         run: aws configure set default.s3.addressing_style path
+
+      # The high-level `aws s3` commands crash on Ceph errors with a cryptic
+      # "argument of type 'NoneType' is not a container or iterable" because the
+      # aws-cli error handler chokes when the RGW error response has Message=None
+      # (aws/aws-cli#10161, fix #10355 still unmerged). The low-level `s3api`
+      # command is not affected, so probe access here to surface the real error.
+      - name: Verify Ceph S3 access
+        run: |
+          set -euo pipefail
+          test -n "${AWS_ENDPOINT_URL:-}" || (echo "AWS_ENDPOINT_URL is empty" && exit 1)
+          echo "Probing s3://${{ vars.BUCKET }}/barcode/ with s3api ..."
+          aws s3api list-objects-v2 \
+            --bucket "${{ vars.BUCKET }}" \
+            --prefix barcode/ \
+            --max-items 1 \
+            --endpoint-url "$AWS_ENDPOINT_URL"
 
       - name: Sync to Ceph S3 Bucket
         run: |
@@ -61,7 +77,7 @@ jobs:
           echo "Deploying to Ceph S3 bucket..."
           test -n "${AWS_ENDPOINT_URL:-}" || (echo "AWS_ENDPOINT_URL is empty" && exit 1)
 
-          aws s3 sync ./public/ s3://products-aspose-cloud/barcode/ \
+          aws s3 sync ./public/ s3://${{ vars.BUCKET }}/barcode/ \
             --endpoint-url "$AWS_ENDPOINT_URL" \
             --acl public-read \
             --exact-timestamps
