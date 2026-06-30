@@ -1,44 +1,83 @@
-# This is a basic workflow to help you get started with Actions
-
 name: Home-Production
 
-# Controls when the action will run. 
-on:    
+on:
   workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production
+    env:
+      DEPLOY_ENV: production
+      AWS_ACCESS_KEY_ID: ${{ secrets.CEPH_S3_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.CEPH_S3_SECRET_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: "true"
+      AWS_ENDPOINT_URL: ${{ vars.AWS_ENDPOINT_URL }}
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
           repository: aspose-cloud/products.aspose.cloud
           token: ${{ secrets.REPO_TOKEN }}
           fetch-depth: 0
-    - name: Setup Hugo
-      uses: peaceiris/actions-hugo@v2
-      with:
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
           hugo-version: 0.136.5
           extended: true
 
-    - name: Install Dependicies1
-      run:  npm install -D --save autoprefixer
+      - name: Install Dependicies1
+        run: npm install -D --save autoprefixer
 
-    - name: Install Dependicies2
-      run:  npm install -D --save postcss-cli
+      - name: Install Dependicies2
+        run: npm install -D --save postcss-cli
 
-    - name: Find and Replace
-      uses: jacobtomlinson/gha-find-replace@v2
-      with:
-        find: "url:"
-        replace: "url_ignore:"
-        include: "_index.md" # Will match all .md files in any nested directory
+      - name: Find and Replace
+        uses: jacobtomlinson/gha-find-replace@v2
+        with:
+          find: "url:"
+          replace: "url_ignore:"
+          include: "_index.md" # Will match all .md files in any nested directory
 
-    - name: Build HOME
-      run: hugo --config "./config-home.toml" -b "https://products.aspose.cloud/" --cleanDestinationDir --minify
-    
-    - name: Deploy HOME to S3
-      run: hugo deploy --config "./config-home.toml" --target "production" --force
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
+      - name: Build HOME
+        run: hugo --config "./config-home.toml" -b "${{ vars.BASEURL }}" --cleanDestinationDir --minify
+
+      - name: Force S3 path-style addressing for Ceph
+        run: aws configure set default.s3.addressing_style path
+
+      # The high-level `aws s3` commands crash on Ceph errors with a cryptic
+      # "argument of type 'NoneType' is not a container or iterable" because the
+      # aws-cli error handler chokes when the RGW error response has Message=None
+      # (aws/aws-cli#10161, fix #10355 still unmerged). The low-level `s3api`
+      # command is not affected, so probe access here to surface the real error.
+      - name: Verify Ceph S3 access
+        run: |
+          set -euo pipefail
+          test -n "${AWS_ENDPOINT_URL:-}" || (echo "AWS_ENDPOINT_URL is empty" && exit 1)
+          echo "Probing s3://${{ vars.BUCKET }}/ with s3api ..."
+          aws s3api list-objects-v2 \
+            --bucket "${{ vars.BUCKET }}" \
+            --max-items 1 \
+            --endpoint-url "$AWS_ENDPOINT_URL"
+
+      - name: Sync to Ceph S3 Bucket
+        run: |
+          set -euo pipefail
+          echo "Deploying to Ceph S3 bucket..."
+          test -n "${AWS_ENDPOINT_URL:-}" || (echo "AWS_ENDPOINT_URL is empty" && exit 1)
+
+          aws s3 sync ./public/ s3://${{ vars.BUCKET }}/ \
+            --endpoint-url "$AWS_ENDPOINT_URL" \
+            --acl public-read \
+            --exact-timestamps
+
+      - name: Purge BunnyCDN (production only)
+        if: success() && env.DEPLOY_ENV == 'production'
+        run: |
+          curl -sS --fail-with-body -G \
+            -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
+            --data-urlencode "url=${{ vars.BASEURL }}*" \
+            "https://api.dynabic.com/bn/purge?async=true"
