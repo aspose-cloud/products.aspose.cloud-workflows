@@ -1,4 +1,4 @@
-name: PDF-Production
+name: OCR-Production
 
 on:
   workflow_dispatch:
@@ -23,7 +23,7 @@ jobs:
           filter: blob:none
           sparse-checkout: |
             config-prod.toml
-            content/pdf
+            content/ocr
             assets
             static
             data
@@ -48,8 +48,8 @@ jobs:
       - name: Find and replace url param in frontmatter
         run: find . -type f -name '*.md' -exec sed -i 's/url:/url_ignore:/g' {} +
 
-      - name: Build pdf
-        run: hugo --config "./config-prod.toml" -c "content/pdf" -b "https://products.aspose.cloud/pdf" --cleanDestinationDir --minify
+      - name: Build ocr
+        run: hugo --config "./config-prod.toml" -c "content/ocr" -b "https://products.aspose.cloud/ocr" --cleanDestinationDir --minify
 
       - name: Force S3 path-style addressing for Ceph
         run: aws configure set default.s3.addressing_style path
@@ -57,10 +57,10 @@ jobs:
       - name: Sync to Ceph S3 Bucket
         run: |
           set -euo pipefail
-          echo "Deploying pdf to Ceph S3..."
+          echo "Deploying ocr to Ceph S3..."
           test -n "${AWS_ENDPOINT_URL:-}" || (echo "AWS_ENDPOINT_URL is empty" && exit 1)
 
-          aws s3 sync ./public/ s3://products-aspose-cloud/pdf/ \
+          aws s3 sync ./public/ s3://products-aspose-cloud/ocr/ \
             --endpoint-url "$AWS_ENDPOINT_URL" \
             --acl public-read \
             --size-only \
@@ -71,5 +71,5 @@ jobs:
         run: |
           curl -sS --fail-with-body -G \
             -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
-            --data-urlencode "url=https://products.aspose.cloud/pdf/*" \
+            --data-urlencode "url=https://products.aspose.cloud/ocr/*" \
             "https://api.dynabic.com/bn/purge?async=true"

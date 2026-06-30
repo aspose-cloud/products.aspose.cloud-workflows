@@ -1,43 +1,75 @@
-# This is a basic workflow to help you get started with Actions
-
 name: tasks-Production
 
-# Controls when the action will run. 
-on:    
+on:
   workflow_dispatch:
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.SMALLIZE_CEPH_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.SMALLIZE_CEPH_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: "true"
+      AWS_ENDPOINT_URL: https://s3.dynabic.com
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
           repository: aspose-cloud/products.aspose.cloud
           token: ${{ secrets.REPO_TOKEN }}
-          fetch-depth: 0
-    - name: Setup Hugo
-      uses: peaceiris/actions-hugo@v2
-      with:
-          hugo-version: 0.110.0
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            config-prod.toml
+            content/tasks
+            assets
+            static
+            data
+            themes
+            package.json
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.110.0'
           extended: true
-    - name: Install Dependicies1
-      run:  npm install -D --save autoprefixer
 
-    - name: Install Dependicies2
-      run:  npm install -D --save postcss-cli
+      - name: Install Dependencies
+        run: npm install -D autoprefixer postcss-cli && npm install
 
-    - name: Find and Replace
-      uses: jacobtomlinson/gha-find-replace@v2
-      with:
-        find: "url:"
-        replace: "url_ignore:"
-        include: "_index.md" # Will match all .md files in any nested directory
+      - name: Find and replace url param in frontmatter
+        run: find . -type f -name '*.md' -exec sed -i 's/url:/url_ignore:/g' {} +
 
-    - name: Build tasks
-      run: hugo --config "./config-prod.toml" -c "content/tasks" -b "https://products.aspose.cloud/tasks" --cleanDestinationDir --minify
-    
-    - name: Deploy tasks to S3
-      run: hugo deploy --config "./config-prod.toml" --target "tasks"  --force
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
+      - name: Build tasks
+        run: hugo --config "./config-prod.toml" -c "content/tasks" -b "https://products.aspose.cloud/tasks" --cleanDestinationDir --minify
+
+      - name: Force S3 path-style addressing for Ceph
+        run: aws configure set default.s3.addressing_style path
+
+      - name: Sync to Ceph S3 Bucket
+        run: |
+          set -euo pipefail
+          echo "Deploying tasks to Ceph S3..."
+          test -n "${AWS_ENDPOINT_URL:-}" || (echo "AWS_ENDPOINT_URL is empty" && exit 1)
+
+          aws s3 sync ./public/ s3://products-aspose-cloud/tasks/ \
+            --endpoint-url "$AWS_ENDPOINT_URL" \
+            --acl public-read \
+            --size-only \
+            --page-size 1000
+
+      - name: Purge BunnyCDN
+        if: success()
+        run: |
+          curl -sS --fail-with-body -G \
+            -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
+            --data-urlencode "url=https://products.aspose.cloud/tasks/*" \
+            "https://api.dynabic.com/bn/purge?async=true"
