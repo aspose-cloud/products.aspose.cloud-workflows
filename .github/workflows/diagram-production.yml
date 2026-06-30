@@ -37,7 +37,7 @@ jobs:
       run: hugo --config "./config-prod.toml" -c "content/diagram" -b "https://products.aspose.cloud/diagram" --cleanDestinationDir --minify
     
     - name: Force S3 path-style addressing for Ceph
-        run: aws configure set default.s3.addressing_style path
+      run: aws configure set default.s3.addressing_style path
 
     - name: Sync to Ceph S3 Bucket - ${{ matrix.configure_one_product }}
       run: |
