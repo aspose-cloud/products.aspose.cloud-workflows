@@ -48,6 +48,22 @@ jobs:
       - name: Force S3 path-style addressing for Ceph
         run: aws configure set default.s3.addressing_style path
 
+      # The high-level `aws s3` commands crash on Ceph errors with a cryptic
+      # "argument of type 'NoneType' is not a container or iterable" because the
+      # aws-cli error handler chokes when the RGW error response has Message=None
+      # (aws/aws-cli#10161, fix #10355 still unmerged). The low-level `s3api`
+      # command is not affected, so probe access here to surface the real error.
+      - name: Verify Ceph S3 access
+        run: |
+          set -euo pipefail
+          test -n "${AWS_ENDPOINT_URL:-}" || (echo "AWS_ENDPOINT_URL is empty" && exit 1)
+          echo "Probing s3://products-aspose-cloud/barcode/ with s3api ..."
+          aws s3api list-objects-v2 \
+            --bucket products-aspose-cloud \
+            --prefix barcode/ \
+            --max-items 1 \
+            --endpoint-url "$AWS_ENDPOINT_URL"
+
       - name: Sync to Ceph S3 Bucket
         run: |
           set -euo pipefail
