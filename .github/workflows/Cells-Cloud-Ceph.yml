@@ -61,7 +61,7 @@ jobs:
           node-version: 20
 
       - name: Update npm
-        run: npm install -g npm@latest
+        run: npm install -g npm@10
 
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
