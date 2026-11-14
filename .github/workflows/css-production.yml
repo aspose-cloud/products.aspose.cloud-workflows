@@ -1,0 +1,81 @@
+name: css-Production
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.SMALLIZE_CEPH_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.SMALLIZE_CEPH_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: "true"
+      AWS_ENDPOINT_URL: https://s3.dynabic.com
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: aspose-cloud/products.aspose.cloud
+          token: ${{ secrets.REPO_TOKEN }}
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            config-prod.toml
+            content/css
+            assets
+            static
+            data
+            themes
+            package.json
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.110.0'
+          extended: true
+
+      - name: Install Dependencies
+        run: npm install -D autoprefixer postcss-cli && npm install
+
+      - name: Find and replace url param in frontmatter
+        run: find . -type f -name '*.md' -exec sed -i 's/url:/url_ignore:/g' {} +
+
+      - name: Build css
+        run: hugo --config "./config-prod.toml" -c "content/css" -b "https://products.aspose.cloud/css" --cleanDestinationDir --minify
+
+      - name: Force S3 path-style addressing for Ceph
+        run: aws configure set default.s3.addressing_style path
+
+      - name: Sync to Ceph S3 Bucket
+        run: |
+          set -euo pipefail
+          echo "Deploying css to Ceph S3..."
+          test -n "${AWS_ENDPOINT_URL:-}" || (echo "AWS_ENDPOINT_URL is empty" && exit 1)
+
+          aws s3 sync ./public/ s3://products-aspose-cloud/css/ \
+            --endpoint-url "$AWS_ENDPOINT_URL" \
+            --acl public-read \
+            --size-only \
+            --page-size 1000
+
+      - name: Purge BunnyCDN
+        id: cdn_purge
+        if: success()
+        continue-on-error: true
+        run: |
+          curl -iG \
+            -H "X-Api-Key: ${{ secrets.BUNNY_API_KEY }}" \
+            --data-urlencode "url=https://products.aspose.cloud/css/*" \
+            "https://api.dynabic.com/bn/purge?async=true"
+
+      - name: Warn on CDN purge failure
+        if: steps.cdn_purge.outcome == 'failure'
+        run: echo "::warning title=CDN purge failed::products.aspose.cloud/css CDN cache purge failed — stale content may be served until TTL expires."
