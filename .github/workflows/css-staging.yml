@@ -45,7 +45,7 @@ jobs:
       run: hugo --config "./config-stage.toml" -c "content/css" -b "https://products-qa.aspose.cloud/css" --cleanDestinationDir --minify
     
     - name: Deploy css to S3
-      run: hugo deploy --config "./config-stage.toml" --target "css" --maxDeletes -1  --force
+      run: hugo deploy --config "./config-stage.toml" --target "css" --maxDeletes 0 --force
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS }}
